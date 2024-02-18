@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
+
+    <link rel="stylesheet" href="/style.css">
+    <title> Forma </title>
+</head>
+
+<body class="loaded">
+
+    <form class="MainForm" action="post" enctype="multipart/form-data">
+        <div>
+            <label for="img_inp">Выберите изображения для загрузки (PNG, JPG)</label>
+            <input type="file" name="img_inp" id="img_inp"
+                accept="image/png, image/jpeg, image/jpg, image/gif, image/vmp, image/svg, image/tiff, image/raw, image/webp"
+                multiple="">
+        </div>
+        <div class="preview">
+            <p>Нет файлов, выбранных в настоящий момент</p>
+        </div>
+
+        <div>
+            <label for="text_inp">Выберите текстовый файл для загрузки (txt, doc)</label>
+            <input type="file" name="text_inp" id="text_inp" class="text_input" accept=".txt, .docx, .doc, .rtf">
+
+            <div class="text_preview">
+                <p>Нет файлов, выбранных в настоящий момент</p>
+            </div>
+
+        </div>
+        <button>Загрузить</button>
+
+    </form>
+    <div class="preloader">
+        <div class="preloader__row">
+          <div class="preloader__item"></div>
+          <div class="preloader__item"></div>
+        </div>
+      </div>
+    <script>
+        let ArrImage = [];
+
+
+        const input = document.querySelector("input");
+        const preview = document.querySelector(".preview");
+
+        input.style.display = "none";
+
+        input.addEventListener("change", updateImageDisplay);
+
+        function updateImageDisplay() {
+            while (preview.firstChild) {
+                preview.removeChild(preview.firstChild);
+            }
+
+            const curFiles = input.files;
+            if (curFiles.length === 0) {
+                const para = document.createElement("p");
+                para.textContent = "No files currently selected for upload";
+                preview.appendChild(para);
+            } else {
+                const list = document.createElement("ol");
+                preview.appendChild(list);
+
+                for (const file of curFiles) {
+                    const listItem = document.createElement("li");
+                    const para = document.createElement("p");
+                    if (validFileType(file)) {
+                        para.textContent = `File name ${file.name}, file size ${returnFileSize(
+                            file.size,
+                        )}.`;
+                        const image = document.createElement("img");
+                        image.src = URL.createObjectURL(file);
+                        image.alt = image.title = file.name;
+
+                        listItem.appendChild(image);
+                        listItem.appendChild(para);
+
+                        ArrImage.push(file);
+
+                    } else {
+                        para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+                        listItem.appendChild(para);
+                    }
+
+                    list.appendChild(listItem);
+                }
+            }
+        }
+
+        const fileTypes = [
+            "image/png",
+            "image/jpeg",
+            "image/jpg",
+            "image/gif",
+            "image/vmp",
+            "image/svg",
+            "image/tiff",
+            "image/raw",
+            "image/webp"
+        ];
+
+        function validFileType(file) {
+            return fileTypes.includes(file.type);
+        }
+
+        function returnFileSize(number) {
+            if (number < 1024) {
+                return `${number} bytes`;
+            } else if (number >= 1024 && number < 1048576) {
+                return `${(number / 1024).toFixed(1)} KB`;
+            } else if (number >= 1048576) {
+                return `${(number / 1048576).toFixed(1)} MB`;
+            }
+        }
+
+        const text_input = document.querySelector(".text_input");
+
+        text_input.style.display = "none";
+
+        const text_preview = document.querySelector(".text_preview")
+
+        text_input.addEventListener("change", () => {
+            while (text_preview.firstChild) {
+                text_preview.removeChild(text_preview.firstChild);
+            }
+
+            const curFiles = text_input.files;
+            if (curFiles.length === 0) {
+                const para = document.createElement("p");
+                para.textContent = "No files currently selected for upload";
+                text_preview.appendChild(para);
+            } else {
+                const list = document.createElement("ol");
+                text_preview.appendChild(list);
+
+                for (const file of curFiles) {
+                    const listItem = document.createElement("li");
+                    const para = document.createElement("p");
+                    if (validtxtFileType(file)) {
+                        para.textContent = `File name ${file.name}, file size ${returnFileSize(
+                            file.size,
+                        )}.`;
+                        listItem.appendChild(para);
+                    } else {
+                        para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+                        listItem.appendChild(para);
+                    }
+
+                    list.appendChild(listItem);
+                }
+            }
+        });
+
+        const filetxtTypes = [
+            ".txt",
+            ".doc",
+            ".docx",
+            ".rtf",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            "text/plain",
+            "application/msword"
+        ];
+
+        function validtxtFileType(file) {
+            return filetxtTypes.includes(file.type);
+        }
+
+        const FormMain = document.querySelector(".MainForm");
+        FormMain.addEventListener("submit", (e) => {
+            console.log("Nice submit");
+            document.body.classList.remove('loaded');
+            e.preventDefault();
+            let file = FormMain.elements["text_inp"].files[0];
+            let reader = new FileReader();
+
+            reader.readAsText(file);
+
+
+            reader.onload = function () {
+                let new_str = reader.result.split('\r');
+                for (let i = 0; i < new_str.length; i++) {
+                    new_str[i] = new_str[i].slice(2);
+                }
+                generate(new_str);
+            };
+
+
+            reader.onerror = function () {
+                console.log(reader.error);
+            };
+        })
+        let offset_horiz = 0;
+        let offset_vertic = 0;
+        let top_marg = 201440;
+        let bottom_marg = 201440;
+        let chetchik = 0;
+        const generatePara = (paraObjec) =>
+            paraObjec.map(
+                ({ format, name_img, text, img_blob }) => {
+                    const children = [
+                        
+                    ];
+                    if (format == ' format1' || format == 'format1') {
+                        console.log(format + ' if')
+                        children.unshift(new docx.TextRun({
+                            text: text,
+                            font: "Arial",
+                            size: 24, // установка размера шрифта в пунктах
+                            
+                        }));
+                        children.push(new docx.ImageRun({
+                            data: img_blob,
+                            transformation: {
+                                width: 400,
+                                height: 400
+                            },
+                            floating: {
+                                horizontalPosition: {
+                                    offset: offset_horiz,
+                                },
+                                verticalPosition: {
+                                    offset: offset_vertic,
+                                },
+                                wrap: {
+                                    type: docx.TextWrappingType.SQUARE,
+                                    side: docx.TextWrappingSide.BOTH_SIDES,
+                                },
+                                margins: {
+                                    left: top_marg,
+                                    right: bottom_marg,
+                                },
+                            },
+                        }));
+                        offset_horiz += 0;
+                        if(offset_vertic == 4014400){
+                            offset_vertic = 0
+                        }else{
+                            offset_vertic += 4014400;
+                        }
+                        top_marg += 1440;
+                        
+
+                    } else if (format == ' format2' || format == 'format2') {
+                        console.log(format + ' else if')
+                        children.push(new docx.TextRun({
+                            text: text,
+                            font: "Arial",
+                            size: 24, // установка размера шрифта в пунктах
+                        }));
+                        children.unshift(new docx.ImageRun({
+                            data: img_blob,
+                            transformation: {
+                                width: 400,
+                                height: 400
+                            },
+                            floating: {
+                                horizontalPosition: {
+                                    offset: 3758800,
+                                },
+                                verticalPosition: {
+                                    offset: offset_vertic,
+                                },
+                                wrap: {
+                                    type: docx.TextWrappingType.SQUARE,
+                                    side: docx.TextWrappingSide.BOTH_SIDES,
+                                },
+                                margins: {
+                                    left: top_marg,
+                                    right: bottom_marg,
+                                },
+                            },
+                            
+                        }));
+                        if(offset_vertic == 4014400){
+                            offset_vertic = 0
+                        }else{
+                            offset_vertic += 4014400;
+                        }
+                    }else if (format == ' format3' || format == 'format3') {
+                        console.log(format + ' else if')
+                        children.push(new docx.TextRun({
+                            text: text,
+                            break: 1,
+                            font: "Arial",
+                            size: 24, // установка размера шрифта в пунктах
+                        }));
+                        children.unshift(new docx.ImageRun({
+                            data: img_blob,
+                            transformation: {
+                                width: 400,
+                                height: 400
+                            },
+                        }));
+                        if(offset_vertic == 4014400){
+                            offset_vertic = 0
+                        }else{
+                            offset_vertic += 4014400;
+                        }
+                        
+                    }else{
+                        children.unshift(new docx.TextRun({
+                            text: text,
+                            font: "Arial",
+                            size: 24, // установка размера шрифта в пунктах
+                        }));
+                        children.push(new docx.TextRun({
+                            text: "",
+                            break: 1,
+                            font: "Arial",
+                            size: 24, // установка размера шрифта в пунктах
+                        }));
+                        children.push(new docx.ImageRun({
+                            data: img_blob,
+                            transformation: {
+                                width: 400,
+                                height: 400
+                            },
+                        }));
+                        if(offset_vertic == 4014400){
+                            offset_vertic = 0
+                        }else{
+                            offset_vertic += 4014400;
+                        }
+                    }
+                    chetchik += 1;
+                    if(chetchik == 3){
+                        chetchik = 0;
+                        return new docx.Paragraph({
+                        children: children,
+                        pageBreakBefore: true,
+                        spacing: {
+                                after: 1000
+                        },
+                    });
+                    }
+                    return new docx.Paragraph({
+                        children: children,
+                        spacing: {
+                                after: 1000
+                        },
+                    });
+                }
+            );
+
+        // const generatePara = (paraObjec) =>
+        //     paraObjec.map(
+        //         ({ format, name_img, text, img_blob }) => {
+        //             const children = [
+        //                 new docx.ImageRun({
+        //                     data: img_blob,
+        //                     transformation: {
+        //                         width: 300,
+        //                         height: 300
+        //                     }
+        //                 }),
+        //             ];
+        //             if (format == 'format1') {
+        //                 console.log('format1')
+        //                 children.unshift(new docx.TextRun({ text: text }));
+        //             }//  else if (format == 'format2') {
+        //             //     console.log('format2')
+        //             //     children.push(new docx.TextRun(text));
+        //             // }
+        //             // console.log(children)
+        //             return new docx.Paragraph({
+        //                 children: children,
+        //             });
+        //         }
+        //     );
+
+        async function generate(file_str) {
+            paraObj = [];
+            // console.log(ArrImage[0])
+            for (let i = 0; i < file_str.length; i += 3) {
+                for (let j = 0; j < ArrImage.length; j++) {
+                    if (' ' + ArrImage[j].name == file_str[i + 1]) {
+                        const blob = await fetch(URL.createObjectURL(ArrImage[j])
+                        ).then(r => r.blob());
+                        paraObj.push({ "format": file_str[i], "name_img": file_str[i + 1], "text": file_str[i + 2], "img_blob": blob })
+                    }
+                    
+                    
+                }
+
+            }
+            paraObj.map(
+                ({ format, name_img, text, img_blob }) =>
+                console.log(img_blob)
+            )
+            const doc = new docx.Document({
+                sections: [{
+                    properties: {},
+                    children: [
+                        ...generatePara(paraObj),
+                    ],
+                }]
+            });
+
+            docx.Packer.toBlob(doc).then(blob => {
+                console.log(blob);
+                saveAs(blob, "example.docx");
+                console.log("Document created successfully");
+                location.reload();
+            });
+        }
+    </script>
+</body>
+
+</html>
