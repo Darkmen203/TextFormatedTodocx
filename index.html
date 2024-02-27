@@ -8,7 +8,8 @@
     <script src="https://unpkg.com/docx@7.1.0/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.js"></script>
 
-    <link rel="stylesheet" href="/TextFormatedTodocx/style.css">
+    <!-- <link rel="stylesheet" href="/TextFormatedTodocx/style.css"> -->
+    <link rel="stylesheet" href="/style.css">
     <title> Forma </title>
 </head>
 
@@ -37,12 +38,38 @@
         <button>Загрузить</button>
 
     </form>
+
+    <section id="preview_doc" class="preview_doc hidden">
+        <div class="center">
+            <button id="DownloadBut">Скачать</button>
+        </div>
+        <!-- <div class="format1">
+            <span> Подобные технологии уже начинают внедряться на практике. Вероятно, имелась в виду функция зрительного управления, появившаяся в 2018 году в iPhone XS Max (операционная система iOS 12).  Для нее был создан браузер Hawkeye, реагирующий на движение глаз пользователя. Впрочем, даже в рекламной публикации эта технология охарактеризована как «непростая в использовании» (tricky to use), поскольку многие важные операции все равно необходимо делать руками – скажем, вводить пароли и адреса электронной почты  </span>
+            <img src="/bb914d41c43c90ed8a678de51bfbe947.jpg" alt="">
+        </div>
+
+        <div class="format2">
+            <span> Также существуют экраны, созданные по технологии «Eyegaze Edge», захватывающие взгляд зрителя и поворачивающиеся вместе с поворотом головы наблюдателя. Вероятно, со временем удастся повысить точность таких взаимодействий и создать полноценные GUI для управления взглядом, либо реализовать что-то вроде картин из «Гарри Поттера», персонажи на которых приходили в движение, когда на картину смотрят (анимация включается при захвате взгляда). Но даже сегодня, когда подобные вещи остаются где-то в рамках биометрии, отметим дрезденскую компанию «Interactive media»; здесь технологии зрительного управления разрабатываются с 1990-х для помощи обездвиженным пациентам, неспособным говорить, которым под силу, прежде всего, зрительный контакт. Возможно, именно в этой нише такие технологии могут активно развиваться уже сейчас. </span>
+            <img src="/unnamed.jpg" alt="">
+        </div>
+
+        <div class="format3">
+            <span> Подобные технологии уже начинают внедряться на практике. Вероятно, имелась в виду функция зрительного управления, появившаяся в 2018 году в iPhone XS Max (операционная система iOS 12).  Для нее был создан браузер Hawkeye, реагирующий на движение глаз пользователя. Впрочем, даже в рекламной публикации эта технология охарактеризована как «непростая в использовании» (tricky to use), поскольку многие важные операции все равно необходимо делать руками – скажем, вводить пароли и адреса электронной почты  </span>
+            <img src="/bb914d41c43c90ed8a678de51bfbe947.jpg" alt="">
+        </div>
+
+        <div class="format4">
+            <span> Также существуют экраны, созданные по технологии «Eyegaze Edge», захватывающие взгляд зрителя и поворачивающиеся вместе с поворотом головы наблюдателя. Вероятно, со временем удастся повысить точность таких взаимодействий и создать полноценные GUI для управления взглядом, либо реализовать что-то вроде картин из «Гарри Поттера», персонажи на которых приходили в движение, когда на картину смотрят (анимация включается при захвате взгляда). Но даже сегодня, когда подобные вещи остаются где-то в рамках биометрии, отметим дрезденскую компанию «Interactive media»; здесь технологии зрительного управления разрабатываются с 1990-х для помощи обездвиженным пациентам, неспособным говорить, которым под силу, прежде всего, зрительный контакт. Возможно, именно в этой нише такие технологии могут активно развиваться уже сейчас. </span>
+            <img src="/unnamed.jpg" alt="">
+        </div> -->
+    </section>
+
     <div class="preloader">
         <div class="preloader__row">
-          <div class="preloader__item"></div>
-          <div class="preloader__item"></div>
+            <div class="preloader__item"></div>
+            <div class="preloader__item"></div>
         </div>
-      </div>
+    </div>
     <script>
         let ArrImage = [];
 
@@ -171,12 +198,19 @@
         function validtxtFileType(file) {
             return filetxtTypes.includes(file.type);
         }
-
+        var globFile;
         const FormMain = document.querySelector(".MainForm");
         FormMain.addEventListener("submit", (e) => {
             console.log("Nice submit");
-            document.body.classList.remove('loaded');
             e.preventDefault();
+            if(!FormMain.elements["text_inp"].files.length){
+                alert("Необходимо загрузить файлы!");
+            }
+            if(!ArrImage.length){
+                alert("Необходимо загрузить изображения!")
+                return;
+            }
+            console.log()
             let file = FormMain.elements["text_inp"].files[0];
             let reader = new FileReader();
 
@@ -188,7 +222,9 @@
                 for (let i = 0; i < new_str.length; i++) {
                     new_str[i] = new_str[i].slice(2);
                 }
-                generate(new_str);
+                // generate(new_str);
+                globFile = new_str;
+                generatePreviewPage(new_str)
             };
 
 
@@ -205,7 +241,7 @@
             paraObjec.map(
                 ({ format, name_img, text, img_blob }) => {
                     const children = [
-                        
+
                     ];
                     if (format == ' format1' || format == 'format1') {
                         console.log(format + ' if')
@@ -213,7 +249,7 @@
                             text: text,
                             font: "Arial",
                             size: 24, // установка размера шрифта в пунктах
-                            
+
                         }));
                         children.push(new docx.ImageRun({
                             data: img_blob,
@@ -239,13 +275,13 @@
                             },
                         }));
                         offset_horiz += 0;
-                        if(offset_vertic == 4014400){
+                        if (offset_vertic == 4014400) {
                             offset_vertic = 0
-                        }else{
+                        } else {
                             offset_vertic += 4014400;
                         }
                         top_marg += 1440;
-                        
+
 
                     } else if (format == ' format2' || format == 'format2') {
                         console.log(format + ' else if')
@@ -276,14 +312,14 @@
                                     right: bottom_marg,
                                 },
                             },
-                            
+
                         }));
-                        if(offset_vertic == 4014400){
+                        if (offset_vertic == 4014400) {
                             offset_vertic = 0
-                        }else{
+                        } else {
                             offset_vertic += 4014400;
                         }
-                    }else if (format == ' format3' || format == 'format3') {
+                    } else if (format == ' format3' || format == 'format3') {
                         console.log(format + ' else if')
                         children.push(new docx.TextRun({
                             text: text,
@@ -298,13 +334,13 @@
                                 height: 400
                             },
                         }));
-                        if(offset_vertic == 4014400){
+                        if (offset_vertic == 4014400) {
                             offset_vertic = 0
-                        }else{
+                        } else {
                             offset_vertic += 4014400;
                         }
-                        
-                    }else{
+
+                    } else {
                         children.unshift(new docx.TextRun({
                             text: text,
                             font: "Arial",
@@ -323,27 +359,27 @@
                                 height: 400
                             },
                         }));
-                        if(offset_vertic == 4014400){
+                        if (offset_vertic == 4014400) {
                             offset_vertic = 0
-                        }else{
+                        } else {
                             offset_vertic += 4014400;
                         }
                     }
                     chetchik += 1;
-                    if(chetchik == 3){
+                    if (chetchik == 3) {
                         chetchik = 0;
                         return new docx.Paragraph({
-                        children: children,
-                        pageBreakBefore: true,
-                        spacing: {
+                            children: children,
+                            pageBreakBefore: true,
+                            spacing: {
                                 after: 1000
-                        },
-                    });
+                            },
+                        });
                     }
                     return new docx.Paragraph({
                         children: children,
                         spacing: {
-                                after: 1000
+                            after: 1000
                         },
                     });
                 }
@@ -374,7 +410,7 @@
         //             });
         //         }
         //     );
-
+        var BlobForDownload;
         async function generate(file_str) {
             paraObj = [];
             // console.log(ArrImage[0])
@@ -385,14 +421,14 @@
                         ).then(r => r.blob());
                         paraObj.push({ "format": file_str[i], "name_img": file_str[i + 1], "text": file_str[i + 2], "img_blob": blob })
                     }
-                    
-                    
+
+
                 }
 
             }
             paraObj.map(
                 ({ format, name_img, text, img_blob }) =>
-                console.log(img_blob)
+                    console.log(img_blob)
             )
             const doc = new docx.Document({
                 sections: [{
@@ -410,6 +446,52 @@
                 location.reload();
             });
         }
+
+        const generatePreviewPage = async (file_str) => {
+            
+            paraObj = [];
+            // console.log(ArrImage[0])
+            for (let i = 0; i < file_str.length; i += 3) {
+                for (let j = 0; j < ArrImage.length; j++) {
+                    if (' ' + ArrImage[j].name == file_str[i + 1]) {
+                        const blob = await fetch(URL.createObjectURL(ArrImage[j])
+                        ).then(r => r.blob());
+                        paraObj.push({ "format": file_str[i], "name_img": file_str[i + 1], "text": file_str[i + 2], "img_blob": blob })
+                    }
+
+
+                }
+
+            }
+            paraObj.map(
+                ({ format, name_img, text, img_blob }) => {
+                    console.log(img_blob)
+                    let ins_elem_div = document.createElement("div");
+
+                    ins_elem_div.classList.add(format.trim());
+
+                    let ins_elem_span = document.createElement("span");
+                    ins_elem_span.textContent = text;
+                    let ins_elem_img = new Image();
+                    ins_elem_img.src = URL.createObjectURL(img_blob);
+                    ins_elem_div.appendChild(ins_elem_span);
+                    ins_elem_div.appendChild(ins_elem_img);  
+                    document.getElementById("preview_doc").appendChild(ins_elem_div);
+
+                    
+                }
+                    
+            )
+            document.querySelector(".MainForm").classList.add("hidden");
+            document.getElementById("preview_doc").classList.remove("hidden");
+            document.body.classList.add('loaded');
+
+        }
+        document.getElementById("DownloadBut").addEventListener("click", () => {
+            document.body.classList.remove('loaded');
+
+            generate(globFile);
+        })
     </script>
 </body>
 

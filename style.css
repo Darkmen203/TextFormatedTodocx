@@ -33,7 +33,7 @@ html {
     padding-left: 10px;
   }
 
-  form label, form button {
+  form label, form button, #DownloadBut {
     background-color: #7F9CCB;
     padding: 5px 10px;
     border-radius: 5px;
@@ -121,3 +121,62 @@ html {
   .loaded .preloader {
     display: none;
   }
+
+.hidden{
+  display: none;
+}
+
+.preview_doc{
+  width: 595px;
+  min-height: 100vh;
+  background-color: rgba(160, 156, 156, 0.19);
+  margin: 0 auto;
+}
+
+
+#DownloadBut{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.preview_doc img{
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
+}
+
+.preview_doc div{
+  display: flex;
+  margin-bottom: 70px;
+  gap: 20px;
+}
+
+.center{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px !important;
+
+}
+
+.format1{
+  flex-direction: row;
+  align-items: center;
+}
+
+.format2{
+  flex-direction: row-reverse;
+  align-items: center;
+}
+
+.format3{
+  flex-direction: column-reverse;
+  align-items: center;
+}
+
+.format4{
+  flex-direction: column;
+  align-items: center;
+}
+
+
